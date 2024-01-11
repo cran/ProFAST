@@ -1,10 +1,10 @@
 ---
-title: 'ProFAST: simulation'
+title: 'FAST: simulation'
 author: "Wei Liu"
 date: "`r Sys.Date()`"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{ProFAST: simulation}
+  %\VignetteIndexEntry{FAST: simulation}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,16 +15,16 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-This vignette introduces the ProFAST workflow for the analysis of  multiple simulated spatial transcriptomics dataset. ProFAST workflow is based on the PRECASTObj object created in the `PRECAST` R package and the workflow of ProFAST is similar to that of PRECAST; see (https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html) for the workflow of PRECAST. The workflow of ProFAST consists of three steps
+This vignette introduces the FAST workflow for the analysis of  multiple simulated spatial transcriptomics dataset.  FAST workflow is based on the PRECASTObj object created in the `PRECAST` R package and the workflow of FAST is similar to that of PRECAST; see (https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html) for the workflow of PRECAST. The workflow of FAST consists of three steps
 
 * Independent preprocessing and model setting
-* Spatial dimension reduction using ProFAST
+* Spatial dimension reduction using FAST
 * Downstream analysis (i.e. , embedding alignment using Harmony and clustering using Louvain, visualization of clusters and embeddings, remove unwanted variation, combined differential expression analysis)
-* Except for the above downstream analyses,  cell-cell interaction analysis and trajectory inference can also be performed on the basis of the embeddings obtained by ProFAST.
+* Except for the above downstream analyses,  cell-cell interaction analysis and trajectory inference can also be performed on the basis of the embeddings obtained by FAST.
 
 
 
-We demonstrate the use of ProFAST to three simulated ST data that are [here](https://github.com/feiyoung/ProFAST/tree/main/vignettes_data), which can be downloaded to the current working path by the following command:
+We demonstrate the use of FAST to three simulated ST data that are [here](https://github.com/feiyoung/ProFAST/tree/main/vignettes_data), which can be downloaded to the current working path by the following command:
 ```{r eval=FALSE}
 githubURL <- "https://github.com/feiyoung/ProFAST/blob/main/vignettes_data/simu3.rds?raw=true"
 download.file(githubURL,"simu3.rds",mode='wb')
@@ -37,7 +37,7 @@ load("simu3.rds")
 
 The package can be loaded with the command:
 ```{r  eval = FALSE}
-library(ProFAST)
+library(ProFAST) # load the package of FAST method
 library(PRECAST)
 library(Seurat)
 ```
@@ -58,7 +58,7 @@ row.names(simu3[[1]])[1:10]
 ## Create a PRECASTObject object
 We show how to create a PRECASTObject object step by step. First, we create a Seurat list object using the count matrix and meta data of each data batch.  Although `simu3` is a prepared Seurat list object, we re-create a same objcet seuList to show the details. 
 
-* Note: the spatial coordinates must be contained in the meta data and named as `row` and `col`, which benefits the identification of spaital coordinates by ProFAST 
+* Note: the spatial coordinates must be contained in the meta data and named as `row` and `col`, which benefits the identification of spaital coordinates by FAST 
 
 ```{r  eval = FALSE}
 ## Get the gene-by-spot read count matrices
@@ -82,7 +82,7 @@ for(r in 1:M){
 
 seuList <- list()
 for(r in 1:M){
-  seuList[[r]] <- CreateSeuratObject(counts = countList[[r]], meta.data=metadataList[[r]], project = "ProFASTsimu")
+  seuList[[r]] <- CreateSeuratObject(counts = countList[[r]], meta.data=metadataList[[r]], project = "FASTsimu")
 }
 
 ```
@@ -104,32 +104,32 @@ PRECASTObj@seulist
 ```
 
 
-## Fit PRECAST using simulated data
+## Fit FAST using simulated data
 
 
 ### Add the model setting
 
-Add adjacency matrix list and parameter setting of ProFAST. More model setting parameters can be found in `model_set_ProFAST()`.
+Add adjacency matrix list and parameter setting of FAST. More model setting parameters can be found in `model_set_FAST()`.
 ```{r  eval = FALSE}
 
 ## seuList is null since the default value `rawData.preserve` is FALSE.
 PRECASTObj@seuList
 
-## Add adjacency matrix list for a PRECASTObj object to prepare for ProFAST model fitting.
+## Add adjacency matrix list for a PRECASTObj object to prepare for FAST model fitting.
 PRECASTObj <- AddAdjList(PRECASTObj, platform = "ST")
 
 ## Add a model setting in advance for a PRECASTObj object: verbose =TRUE helps outputing the information in the algorithm; 
-PRECASTObj <- AddParSettingProFAST(PRECASTObj, verbose=TRUE)
+PRECASTObj <- AddParSettingFAST(PRECASTObj, verbose=TRUE)
 ## Check the parameters
 PRECASTObj@parameterList
 ```
 
-### Fit ProFAST 
-For function `ProFAST`, users can specify the number of factors `q` and the fitted model `fit.model`. The `q` sets the number of spatial factors to be extracted, and a lareger one means more information to be extracted but higher computaional cost. The `fit.model` specifies the version of ProFAST to be fitted. The Gaussian version (`gaussian`) models the log-count matrices while the Poisson verion (`poisson`) models the count matrices; default as `poisson`.
+### Fit FAST 
+For function `FAST`, users can specify the number of factors `q` and the fitted model `fit.model`. The `q` sets the number of spatial factors to be extracted, and a lareger one means more information to be extracted but higher computaional cost. The `fit.model` specifies the version of FAST to be fitted. The Gaussian version (`gaussian`) models the log-count matrices while the Poisson verion (`poisson`) models the count matrices; default as `poisson`.
 ```{r  eval = FALSE}
 ### set q= 20 here
 set.seed(2023)
-PRECASTObj <- ProFAST(PRECASTObj, q=20)
+PRECASTObj <- FAST(PRECASTObj, q=20)
 ### Check the results
 str(PRECASTObj@resList)
 ```
@@ -139,7 +139,7 @@ str(PRECASTObj@resList)
 Users can also use the gaussian version by the following command:
 ```{r  eval =FALSE}
 set.seed(2023)
-PRECASTObj <- ProFAST(PRECASTObj, q=20, fit.model='gaussian')
+PRECASTObj <- FAST(PRECASTObj, q=20, fit.model='gaussian')
 ### Check the results
 str(PRECASTObj@resList)
 ```
@@ -152,14 +152,14 @@ Next, we investigate the performance of dimension reduction by calculating the a
 ## Obtain the true labels
 yList <- lapply(PRECASTObj@seulist, function(x) x$Group)
 ### Evaluate the MacR2
-MacVec <- sapply(1:length(PRECASTObj@seulist), function(r) get_r2_mcfadden(PRECASTObj@resList$ProFAST$hV[[r]], yList[[r]]))
+MacVec <- sapply(1:length(PRECASTObj@seulist), function(r) get_r2_mcfadden(PRECASTObj@resList$FAST$hV[[r]], yList[[r]]))
 ### output them
 print(MacVec)
 ```
 
 
 ## Embedding alignment and clustering using Harmony and Louvain
-Based on the embeddings from ProFAST, we use `Harmony` to align the embeddings then followed by Louvain clustering to obtain the cluster labels. In this downstream analysis, other methods for embedding alignment and clustering can be also used. In the vignette of two sections of DLPFC Visium data, we will show another method (`iSC-MEB`) to jointly perform embedding alignment and spatial clustering.
+Based on the embeddings from FAST, we use `Harmony` to align the embeddings then followed by Louvain clustering to obtain the cluster labels. In this downstream analysis, other methods for embedding alignment and clustering can be also used. In the vignette of two sections of DLPFC Visium data, we will show another method (`iSC-MEB`) to jointly perform embedding alignment and spatial clustering.
 
 ```{r  eval = FALSE}
 PRECASTObj <- RunHarmonyLouvain(PRECASTObj, resolution = 0.4)
@@ -178,7 +178,7 @@ str(PRECASTObj@resList$Harmony)
 str(PRECASTObj@resList$Louvain)
 ```
 
-Then, we integrate the three sections by  removing the unwanted variations and setting `seulist_HK=NULL` and `Method = "HarmonyLouvain"` in the function `IntegrateSRTData()`. After obtaining `seuInt`, we will see there are three embeddings: `profast`, `harmony` and `position`, in the slot `seuInt@reductions`. `profast` are the embeddings obtained by ProFAST model fitting and are uncorrected embeddings that may includes the unwanted effects (i.e., batch effects); `harmony`are the embeddings obtained by Harmony fitting and are aligned embeddings; and `position` are the spatial coordinates.
+Then, we integrate the three sections by  removing the unwanted variations and setting `seulist_HK=NULL` and `Method = "HarmonyLouvain"` in the function `IntegrateSRTData()`. After obtaining `seuInt`, we will see there are three embeddings: `FAST`, `harmony` and `position`, in the slot `seuInt@reductions`. `FAST` are the embeddings obtained by FAST model fitting and are uncorrected embeddings that may includes the unwanted effects (i.e., batch effects); `harmony`are the embeddings obtained by Harmony fitting and are aligned embeddings; and `position` are the spatial coordinates.
 ```{r  eval = FALSE}
 seulist_HK <- NULL
 seuInt <- IntegrateSRTData(PRECASTObj, seulist_HK=seulist_HK, Method = "HarmonyLouvain", seuList_raw=NULL, covariates_use=NULL, verbose=TRUE)
@@ -205,7 +205,7 @@ drawFigs(pList, layout.dim = c(1, 3), common.legend = TRUE, legend.position = "r
 
 We use the function `AddUMAP()` in the R package `PRECAST` to obtain the three-dimensional components of UMAP using the aligned embeddings in the reduction `harmony`. 
 ```{r  eval = FALSE}
-seuInt <- AddUMAP(seuInt, n_comp=3, reduction = 'harmony', assay = 'ProFAST')
+seuInt <- AddUMAP(seuInt, n_comp=3, reduction = 'harmony', assay = 'RNA')
 seuInt
 ```
 We plot the spatial tNSE RGB plot to illustrate the performance in extracting features.
@@ -216,7 +216,7 @@ drawFigs(p13, layout.dim = c(1, 3), common.legend = TRUE, legend.position = "rig
 ```
 We use the function `AddUTSNE()` in the R package `PRECAST` to obtain the two-dimensional components of UMAP using the aligned embeddings in the reduction `harmony`, and  plot the tSNE plot based on the extracted features  to check the performance of integration.
 ```{r  eval = FALSE, fig.width=9, fig.height=3.3}
-seuInt <- AddTSNE(seuInt, n_comp = 2, reduction = 'harmony', assay = 'ProFAST')
+seuInt <- AddTSNE(seuInt, n_comp = 2, reduction = 'harmony', assay = 'RNA')
 p1 <- dimPlot(seuInt, item = "cluster", point_size = 0.5, font_family = "serif", cols = cols_cluster,
     border_col = "gray10",  legend_pos = "right")  # Times New Roman
 p2 <- dimPlot(seuInt, item = "batch", point_size = 0.5, font_family = "serif", legend_pos = "right")
@@ -236,7 +236,7 @@ dat_deg %>%
 seuInt <- ScaleData(seuInt)
 ```
 
-Plot dot plot of normalized expressions for each spatial domain identified by using the ProFAST embeddings.
+Plot dot plot of normalized expressions for each spatial domain identified by using the FAST embeddings.
 ```{r  eval = FALSE, fig.width=9, fig.height=5.4}
 col_here <- c("#F2E6AB", "#9C0141") 
 library(ggplot2)

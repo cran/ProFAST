@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 #  load("simu3.rds")
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  library(ProFAST)
+#  library(ProFAST) # load the package of FAST method
 #  library(PRECAST)
 #  library(Seurat)
 
@@ -48,7 +48,7 @@ knitr::opts_chunk$set(
 #  
 #  seuList <- list()
 #  for(r in 1:M){
-#    seuList[[r]] <- CreateSeuratObject(counts = countList[[r]], meta.data=metadataList[[r]], project = "ProFASTsimu")
+#    seuList[[r]] <- CreateSeuratObject(counts = countList[[r]], meta.data=metadataList[[r]], project = "FASTsimu")
 #  }
 #  
 
@@ -69,24 +69,24 @@ knitr::opts_chunk$set(
 #  ## seuList is null since the default value `rawData.preserve` is FALSE.
 #  PRECASTObj@seuList
 #  
-#  ## Add adjacency matrix list for a PRECASTObj object to prepare for ProFAST model fitting.
+#  ## Add adjacency matrix list for a PRECASTObj object to prepare for FAST model fitting.
 #  PRECASTObj <- AddAdjList(PRECASTObj, platform = "ST")
 #  
 #  ## Add a model setting in advance for a PRECASTObj object: verbose =TRUE helps outputing the information in the algorithm;
-#  PRECASTObj <- AddParSettingProFAST(PRECASTObj, verbose=TRUE)
+#  PRECASTObj <- AddParSettingFAST(PRECASTObj, verbose=TRUE)
 #  ## Check the parameters
 #  PRECASTObj@parameterList
 
 ## ----eval = FALSE-------------------------------------------------------------
 #  ### set q= 20 here
 #  set.seed(2023)
-#  PRECASTObj <- ProFAST(PRECASTObj, q=20)
+#  PRECASTObj <- FAST(PRECASTObj, q=20)
 #  ### Check the results
 #  str(PRECASTObj@resList)
 
 ## ----eval =FALSE--------------------------------------------------------------
 #  set.seed(2023)
-#  PRECASTObj <- ProFAST(PRECASTObj, q=20, fit.model='gaussian')
+#  PRECASTObj <- FAST(PRECASTObj, q=20, fit.model='gaussian')
 #  ### Check the results
 #  str(PRECASTObj@resList)
 
@@ -94,7 +94,7 @@ knitr::opts_chunk$set(
 #  ## Obtain the true labels
 #  yList <- lapply(PRECASTObj@seulist, function(x) x$Group)
 #  ### Evaluate the MacR2
-#  MacVec <- sapply(1:length(PRECASTObj@seulist), function(r) get_r2_mcfadden(PRECASTObj@resList$ProFAST$hV[[r]], yList[[r]]))
+#  MacVec <- sapply(1:length(PRECASTObj@seulist), function(r) get_r2_mcfadden(PRECASTObj@resList$FAST$hV[[r]], yList[[r]]))
 #  ### output them
 #  print(MacVec)
 
@@ -124,7 +124,7 @@ knitr::opts_chunk$set(
 #  drawFigs(pList, layout.dim = c(1, 3), common.legend = TRUE, legend.position = "right", align = "hv")
 
 ## ----eval = FALSE-------------------------------------------------------------
-#  seuInt <- AddUMAP(seuInt, n_comp=3, reduction = 'harmony', assay = 'ProFAST')
+#  seuInt <- AddUMAP(seuInt, n_comp=3, reduction = 'harmony', assay = 'RNA')
 #  seuInt
 
 ## ----eval = FALSE, fig.width=9, fig.height=3.3--------------------------------
@@ -133,7 +133,7 @@ knitr::opts_chunk$set(
 #  
 
 ## ----eval = FALSE, fig.width=9, fig.height=3.3--------------------------------
-#  seuInt <- AddTSNE(seuInt, n_comp = 2, reduction = 'harmony', assay = 'ProFAST')
+#  seuInt <- AddTSNE(seuInt, n_comp = 2, reduction = 'harmony', assay = 'RNA')
 #  p1 <- dimPlot(seuInt, item = "cluster", point_size = 0.5, font_family = "serif", cols = cols_cluster,
 #      border_col = "gray10",  legend_pos = "right")  # Times New Roman
 #  p2 <- dimPlot(seuInt, item = "batch", point_size = 0.5, font_family = "serif", legend_pos = "right")

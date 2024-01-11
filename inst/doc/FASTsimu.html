@@ -12,9 +12,9 @@
 
 <meta name="author" content="Wei Liu" />
 
-<meta name="date" content="2023-06-08" />
+<meta name="date" content="2024-01-11" />
 
-<title>ProFAST: simulation</title>
+<title>FAST: simulation</title>
 
 
 <style type="text/css">
@@ -316,26 +316,26 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<h1 class="title toc-ignore">ProFAST: simulation</h1>
+<h1 class="title toc-ignore">FAST: simulation</h1>
 <h4 class="author">Wei Liu</h4>
-<h4 class="date">2023-06-08</h4>
+<h4 class="date">2024-01-11</h4>
 
 
 
-<p>This vignette introduces the ProFAST workflow for the analysis of multiple simulated spatial transcriptomics dataset. ProFAST workflow is based on the PRECASTObj object created in the <code>PRECAST</code> R package and the workflow of ProFAST is similar to that of PRECAST; see (<a href="https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html" class="uri">https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html</a>) for the workflow of PRECAST. The workflow of ProFAST consists of three steps</p>
+<p>This vignette introduces the FAST workflow for the analysis of multiple simulated spatial transcriptomics dataset. FAST workflow is based on the PRECASTObj object created in the <code>PRECAST</code> R package and the workflow of FAST is similar to that of PRECAST; see (<a href="https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html" class="uri">https://feiyoung.github.io/PRECAST/articles/PRECAST.BreastCancer.html</a>) for the workflow of PRECAST. The workflow of FAST consists of three steps</p>
 <ul>
 <li>Independent preprocessing and model setting</li>
-<li>Spatial dimension reduction using ProFAST</li>
+<li>Spatial dimension reduction using FAST</li>
 <li>Downstream analysis (i.e. , embedding alignment using Harmony and clustering using Louvain, visualization of clusters and embeddings, remove unwanted variation, combined differential expression analysis)</li>
-<li>Except for the above downstream analyses, cell-cell interaction analysis and trajectory inference can also be performed on the basis of the embeddings obtained by ProFAST.</li>
+<li>Except for the above downstream analyses, cell-cell interaction analysis and trajectory inference can also be performed on the basis of the embeddings obtained by FAST.</li>
 </ul>
-<p>We demonstrate the use of ProFAST to three simulated ST data that are <a href="https://github.com/feiyoung/ProFAST/tree/main/vignettes_data">here</a>, which can be downloaded to the current working path by the following command:</p>
+<p>We demonstrate the use of FAST to three simulated ST data that are <a href="https://github.com/feiyoung/ProFAST/tree/main/vignettes_data">here</a>, which can be downloaded to the current working path by the following command:</p>
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">githubURL &lt;-<span class="st"> &quot;https://github.com/feiyoung/ProFAST/blob/main/vignettes_data/simu3.rds?raw=true&quot;</span></a>
 <a class="sourceLine" id="cb1-2" title="2"><span class="kw">download.file</span>(githubURL,<span class="st">&quot;simu3.rds&quot;</span>,<span class="dt">mode=</span><span class="st">&#39;wb&#39;</span>)</a></code></pre></div>
 <p>Then load to R</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1"><span class="kw">load</span>(<span class="st">&quot;simu3.rds&quot;</span>)</a></code></pre></div>
 <p>The package can be loaded with the command:</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">library</span>(ProFAST)</a>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="kw">library</span>(ProFAST) <span class="co"># load the package of FAST method</span></a>
 <a class="sourceLine" id="cb3-2" title="2"><span class="kw">library</span>(PRECAST)</a>
 <a class="sourceLine" id="cb3-3" title="3"><span class="kw">library</span>(Seurat)</a></code></pre></div>
 <div id="view-the-simulated-data" class="section level2">
@@ -350,7 +350,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <h2>Create a PRECASTObject object</h2>
 <p>We show how to create a PRECASTObject object step by step. First, we create a Seurat list object using the count matrix and meta data of each data batch. Although <code>simu3</code> is a prepared Seurat list object, we re-create a same objcet seuList to show the details.</p>
 <ul>
-<li>Note: the spatial coordinates must be contained in the meta data and named as <code>row</code> and <code>col</code>, which benefits the identification of spaital coordinates by ProFAST</li>
+<li>Note: the spatial coordinates must be contained in the meta data and named as <code>row</code> and <code>col</code>, which benefits the identification of spaital coordinates by FAST</li>
 </ul>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co">## Get the gene-by-spot read count matrices</span></a>
 <a class="sourceLine" id="cb7-2" title="2">countList &lt;-<span class="st"> </span><span class="kw">lapply</span>(simu3, <span class="cf">function</span>(x) x[[<span class="st">&quot;RNA&quot;</span>]]<span class="op">@</span>counts)</a>
@@ -373,7 +373,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb7-19" title="19"></a>
 <a class="sourceLine" id="cb7-20" title="20">seuList &lt;-<span class="st"> </span><span class="kw">list</span>()</a>
 <a class="sourceLine" id="cb7-21" title="21"><span class="cf">for</span>(r <span class="cf">in</span> <span class="dv">1</span><span class="op">:</span>M){</a>
-<a class="sourceLine" id="cb7-22" title="22">  seuList[[r]] &lt;-<span class="st"> </span><span class="kw">CreateSeuratObject</span>(<span class="dt">counts =</span> countList[[r]], <span class="dt">meta.data=</span>metadataList[[r]], <span class="dt">project =</span> <span class="st">&quot;ProFASTsimu&quot;</span>)</a>
+<a class="sourceLine" id="cb7-22" title="22">  seuList[[r]] &lt;-<span class="st"> </span><span class="kw">CreateSeuratObject</span>(<span class="dt">counts =</span> countList[[r]], <span class="dt">meta.data=</span>metadataList[[r]], <span class="dt">project =</span> <span class="st">&quot;FASTsimu&quot;</span>)</a>
 <a class="sourceLine" id="cb7-23" title="23">}</a></code></pre></div>
 <div id="prepare-the-precastobject-with-preprocessing-step." class="section level3">
 <h3>Prepare the PRECASTObject with preprocessing step.</h3>
@@ -390,35 +390,35 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb8-10" title="10">PRECASTObj<span class="op">@</span>seulist</a></code></pre></div>
 </div>
 </div>
-<div id="fit-precast-using-simulated-data" class="section level2">
-<h2>Fit PRECAST using simulated data</h2>
+<div id="fit-fast-using-simulated-data" class="section level2">
+<h2>Fit FAST using simulated data</h2>
 <div id="add-the-model-setting" class="section level3">
 <h3>Add the model setting</h3>
-<p>Add adjacency matrix list and parameter setting of ProFAST. More model setting parameters can be found in <code>model_set_ProFAST()</code>.</p>
+<p>Add adjacency matrix list and parameter setting of FAST. More model setting parameters can be found in <code>model_set_FAST()</code>.</p>
 <div class="sourceCode" id="cb9"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb9-1" title="1"></a>
 <a class="sourceLine" id="cb9-2" title="2"><span class="co">## seuList is null since the default value `rawData.preserve` is FALSE.</span></a>
 <a class="sourceLine" id="cb9-3" title="3">PRECASTObj<span class="op">@</span>seuList</a>
 <a class="sourceLine" id="cb9-4" title="4"></a>
-<a class="sourceLine" id="cb9-5" title="5"><span class="co">## Add adjacency matrix list for a PRECASTObj object to prepare for ProFAST model fitting.</span></a>
+<a class="sourceLine" id="cb9-5" title="5"><span class="co">## Add adjacency matrix list for a PRECASTObj object to prepare for FAST model fitting.</span></a>
 <a class="sourceLine" id="cb9-6" title="6">PRECASTObj &lt;-<span class="st"> </span><span class="kw">AddAdjList</span>(PRECASTObj, <span class="dt">platform =</span> <span class="st">&quot;ST&quot;</span>)</a>
 <a class="sourceLine" id="cb9-7" title="7"></a>
 <a class="sourceLine" id="cb9-8" title="8"><span class="co">## Add a model setting in advance for a PRECASTObj object: verbose =TRUE helps outputing the information in the algorithm; </span></a>
-<a class="sourceLine" id="cb9-9" title="9">PRECASTObj &lt;-<span class="st"> </span><span class="kw">AddParSettingProFAST</span>(PRECASTObj, <span class="dt">verbose=</span><span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb9-9" title="9">PRECASTObj &lt;-<span class="st"> </span><span class="kw">AddParSettingFAST</span>(PRECASTObj, <span class="dt">verbose=</span><span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb9-10" title="10"><span class="co">## Check the parameters</span></a>
 <a class="sourceLine" id="cb9-11" title="11">PRECASTObj<span class="op">@</span>parameterList</a></code></pre></div>
 </div>
-<div id="fit-profast" class="section level3">
-<h3>Fit ProFAST</h3>
-<p>For function <code>ProFAST</code>, users can specify the number of factors <code>q</code> and the fitted model <code>fit.model</code>. The <code>q</code> sets the number of spatial factors to be extracted, and a lareger one means more information to be extracted but higher computaional cost. The <code>fit.model</code> specifies the version of ProFAST to be fitted. The Gaussian version (<code>gaussian</code>) models the log-count matrices while the Poisson verion (<code>poisson</code>) models the count matrices; default as <code>poisson</code>.</p>
+<div id="fit-fast" class="section level3">
+<h3>Fit FAST</h3>
+<p>For function <code>FAST</code>, users can specify the number of factors <code>q</code> and the fitted model <code>fit.model</code>. The <code>q</code> sets the number of spatial factors to be extracted, and a lareger one means more information to be extracted but higher computaional cost. The <code>fit.model</code> specifies the version of FAST to be fitted. The Gaussian version (<code>gaussian</code>) models the log-count matrices while the Poisson verion (<code>poisson</code>) models the count matrices; default as <code>poisson</code>.</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb10-1" title="1"><span class="co">### set q= 20 here</span></a>
 <a class="sourceLine" id="cb10-2" title="2"><span class="kw">set.seed</span>(<span class="dv">2023</span>)</a>
-<a class="sourceLine" id="cb10-3" title="3">PRECASTObj &lt;-<span class="st"> </span><span class="kw">ProFAST</span>(PRECASTObj, <span class="dt">q=</span><span class="dv">20</span>)</a>
+<a class="sourceLine" id="cb10-3" title="3">PRECASTObj &lt;-<span class="st"> </span><span class="kw">FAST</span>(PRECASTObj, <span class="dt">q=</span><span class="dv">20</span>)</a>
 <a class="sourceLine" id="cb10-4" title="4"><span class="co">### Check the results</span></a>
 <a class="sourceLine" id="cb10-5" title="5"><span class="kw">str</span>(PRECASTObj<span class="op">@</span>resList)</a></code></pre></div>
 <details>
 <p><summary><strong>Run gaussian version</strong></summary> Users can also use the gaussian version by the following command:</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb11-1" title="1"><span class="kw">set.seed</span>(<span class="dv">2023</span>)</a>
-<a class="sourceLine" id="cb11-2" title="2">PRECASTObj &lt;-<span class="st"> </span><span class="kw">ProFAST</span>(PRECASTObj, <span class="dt">q=</span><span class="dv">20</span>, <span class="dt">fit.model=</span><span class="st">&#39;gaussian&#39;</span>)</a>
+<a class="sourceLine" id="cb11-2" title="2">PRECASTObj &lt;-<span class="st"> </span><span class="kw">FAST</span>(PRECASTObj, <span class="dt">q=</span><span class="dv">20</span>, <span class="dt">fit.model=</span><span class="st">&#39;gaussian&#39;</span>)</a>
 <a class="sourceLine" id="cb11-3" title="3"><span class="co">### Check the results</span></a>
 <a class="sourceLine" id="cb11-4" title="4"><span class="kw">str</span>(PRECASTObj<span class="op">@</span>resList)</a></code></pre></div>
 </details>
@@ -429,14 +429,14 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb12"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb12-1" title="1"><span class="co">## Obtain the true labels</span></a>
 <a class="sourceLine" id="cb12-2" title="2">yList &lt;-<span class="st"> </span><span class="kw">lapply</span>(PRECASTObj<span class="op">@</span>seulist, <span class="cf">function</span>(x) x<span class="op">$</span>Group)</a>
 <a class="sourceLine" id="cb12-3" title="3"><span class="co">### Evaluate the MacR2</span></a>
-<a class="sourceLine" id="cb12-4" title="4">MacVec &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(PRECASTObj<span class="op">@</span>seulist), <span class="cf">function</span>(r) <span class="kw">get_r2_mcfadden</span>(PRECASTObj<span class="op">@</span>resList<span class="op">$</span>ProFAST<span class="op">$</span>hV[[r]], yList[[r]]))</a>
+<a class="sourceLine" id="cb12-4" title="4">MacVec &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">length</span>(PRECASTObj<span class="op">@</span>seulist), <span class="cf">function</span>(r) <span class="kw">get_r2_mcfadden</span>(PRECASTObj<span class="op">@</span>resList<span class="op">$</span>FAST<span class="op">$</span>hV[[r]], yList[[r]]))</a>
 <a class="sourceLine" id="cb12-5" title="5"><span class="co">### output them</span></a>
 <a class="sourceLine" id="cb12-6" title="6"><span class="kw">print</span>(MacVec)</a></code></pre></div>
 </div>
 </div>
 <div id="embedding-alignment-and-clustering-using-harmony-and-louvain" class="section level2">
 <h2>Embedding alignment and clustering using Harmony and Louvain</h2>
-<p>Based on the embeddings from ProFAST, we use <code>Harmony</code> to align the embeddings then followed by Louvain clustering to obtain the cluster labels. In this downstream analysis, other methods for embedding alignment and clustering can be also used. In the vignette of two sections of DLPFC Visium data, we will show another method (<code>iSC-MEB</code>) to jointly perform embedding alignment and spatial clustering.</p>
+<p>Based on the embeddings from FAST, we use <code>Harmony</code> to align the embeddings then followed by Louvain clustering to obtain the cluster labels. In this downstream analysis, other methods for embedding alignment and clustering can be also used. In the vignette of two sections of DLPFC Visium data, we will show another method (<code>iSC-MEB</code>) to jointly perform embedding alignment and spatial clustering.</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb13-1" title="1">PRECASTObj &lt;-<span class="st"> </span><span class="kw">RunHarmonyLouvain</span>(PRECASTObj, <span class="dt">resolution =</span> <span class="fl">0.4</span>)</a>
 <a class="sourceLine" id="cb13-2" title="2">ARI_vec &lt;-<span class="st"> </span><span class="kw">sapply</span>(<span class="dv">1</span><span class="op">:</span>M, <span class="cf">function</span>(r) mclust<span class="op">::</span><span class="kw">adjustedRandIndex</span>(PRECASTObj<span class="op">@</span>resList<span class="op">$</span>Louvain<span class="op">$</span>cluster[[r]], yList[[r]]))</a>
 <a class="sourceLine" id="cb13-3" title="3"><span class="kw">print</span>(ARI_vec)</a></code></pre></div>
@@ -447,7 +447,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <p>The estimated embeddings of batch effects (batchEmbed) are in the slot <code>PRECASTObj@resList$Harmony</code> and cluster labels (cluster) are in the slot <code>PRECASTObj@resList$Louvain</code>.</p>
 <div class="sourceCode" id="cb14"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb14-1" title="1"><span class="kw">str</span>(PRECASTObj<span class="op">@</span>resList<span class="op">$</span>Harmony)</a>
 <a class="sourceLine" id="cb14-2" title="2"><span class="kw">str</span>(PRECASTObj<span class="op">@</span>resList<span class="op">$</span>Louvain)</a></code></pre></div>
-<p>Then, we integrate the three sections by removing the unwanted variations and setting <code>seulist_HK=NULL</code> and <code>Method = &quot;HarmonyLouvain&quot;</code> in the function <code>IntegrateSRTData()</code>. After obtaining <code>seuInt</code>, we will see there are three embeddings: <code>profast</code>, <code>harmony</code> and <code>position</code>, in the slot <code>seuInt@reductions</code>. <code>profast</code> are the embeddings obtained by ProFAST model fitting and are uncorrected embeddings that may includes the unwanted effects (i.e., batch effects); <code>harmony</code>are the embeddings obtained by Harmony fitting and are aligned embeddings; and <code>position</code> are the spatial coordinates.</p>
+<p>Then, we integrate the three sections by removing the unwanted variations and setting <code>seulist_HK=NULL</code> and <code>Method = &quot;HarmonyLouvain&quot;</code> in the function <code>IntegrateSRTData()</code>. After obtaining <code>seuInt</code>, we will see there are three embeddings: <code>FAST</code>, <code>harmony</code> and <code>position</code>, in the slot <code>seuInt@reductions</code>. <code>FAST</code> are the embeddings obtained by FAST model fitting and are uncorrected embeddings that may includes the unwanted effects (i.e., batch effects); <code>harmony</code>are the embeddings obtained by Harmony fitting and are aligned embeddings; and <code>position</code> are the spatial coordinates.</p>
 <div class="sourceCode" id="cb15"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb15-1" title="1">seulist_HK &lt;-<span class="st"> </span><span class="ot">NULL</span></a>
 <a class="sourceLine" id="cb15-2" title="2">seuInt &lt;-<span class="st"> </span><span class="kw">IntegrateSRTData</span>(PRECASTObj, <span class="dt">seulist_HK=</span>seulist_HK, <span class="dt">Method =</span> <span class="st">&quot;HarmonyLouvain&quot;</span>, <span class="dt">seuList_raw=</span><span class="ot">NULL</span>, <span class="dt">covariates_use=</span><span class="ot">NULL</span>, <span class="dt">verbose=</span><span class="ot">TRUE</span>)</a>
 <a class="sourceLine" id="cb15-3" title="3">seuInt</a></code></pre></div>
@@ -463,13 +463,13 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <div class="sourceCode" id="cb18"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb18-1" title="1">pList &lt;-<span class="st"> </span><span class="kw">SpaPlot</span>(seuInt, <span class="dt">item =</span> <span class="st">&quot;cluster&quot;</span>, <span class="dt">title_name=</span> <span class="st">&#39;Section&#39;</span>,<span class="dt">batch =</span> <span class="ot">NULL</span>, <span class="dt">point_size =</span> <span class="dv">1</span>, <span class="dt">cols =</span> cols_cluster, <span class="dt">combine =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb18-2" title="2"><span class="kw">drawFigs</span>(pList, <span class="dt">layout.dim =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">common.legend =</span> <span class="ot">TRUE</span>, <span class="dt">legend.position =</span> <span class="st">&quot;right&quot;</span>, <span class="dt">align =</span> <span class="st">&quot;hv&quot;</span>)</a></code></pre></div>
 <p>We use the function <code>AddUMAP()</code> in the R package <code>PRECAST</code> to obtain the three-dimensional components of UMAP using the aligned embeddings in the reduction <code>harmony</code>.</p>
-<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">seuInt &lt;-<span class="st"> </span><span class="kw">AddUMAP</span>(seuInt, <span class="dt">n_comp=</span><span class="dv">3</span>, <span class="dt">reduction =</span> <span class="st">&#39;harmony&#39;</span>, <span class="dt">assay =</span> <span class="st">&#39;ProFAST&#39;</span>)</a>
+<div class="sourceCode" id="cb19"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb19-1" title="1">seuInt &lt;-<span class="st"> </span><span class="kw">AddUMAP</span>(seuInt, <span class="dt">n_comp=</span><span class="dv">3</span>, <span class="dt">reduction =</span> <span class="st">&#39;harmony&#39;</span>, <span class="dt">assay =</span> <span class="st">&#39;RNA&#39;</span>)</a>
 <a class="sourceLine" id="cb19-2" title="2">seuInt</a></code></pre></div>
 <p>We plot the spatial tNSE RGB plot to illustrate the performance in extracting features.</p>
 <div class="sourceCode" id="cb20"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb20-1" title="1">p13 &lt;-<span class="st"> </span><span class="kw">SpaPlot</span>(seuInt, <span class="dt">batch =</span> <span class="ot">NULL</span>, <span class="dt">item =</span> <span class="st">&quot;RGB_UMAP&quot;</span>, <span class="dt">point_size =</span> <span class="dv">1</span>, <span class="dt">combine =</span> <span class="ot">FALSE</span>, <span class="dt">text_size =</span> <span class="dv">15</span>)</a>
 <a class="sourceLine" id="cb20-2" title="2"><span class="kw">drawFigs</span>(p13, <span class="dt">layout.dim =</span> <span class="kw">c</span>(<span class="dv">1</span>, <span class="dv">3</span>), <span class="dt">common.legend =</span> <span class="ot">TRUE</span>, <span class="dt">legend.position =</span> <span class="st">&quot;right&quot;</span>, <span class="dt">align =</span> <span class="st">&quot;hv&quot;</span>)</a></code></pre></div>
 <p>We use the function <code>AddUTSNE()</code> in the R package <code>PRECAST</code> to obtain the two-dimensional components of UMAP using the aligned embeddings in the reduction <code>harmony</code>, and plot the tSNE plot based on the extracted features to check the performance of integration.</p>
-<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">seuInt &lt;-<span class="st"> </span><span class="kw">AddTSNE</span>(seuInt, <span class="dt">n_comp =</span> <span class="dv">2</span>, <span class="dt">reduction =</span> <span class="st">&#39;harmony&#39;</span>, <span class="dt">assay =</span> <span class="st">&#39;ProFAST&#39;</span>)</a>
+<div class="sourceCode" id="cb21"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb21-1" title="1">seuInt &lt;-<span class="st"> </span><span class="kw">AddTSNE</span>(seuInt, <span class="dt">n_comp =</span> <span class="dv">2</span>, <span class="dt">reduction =</span> <span class="st">&#39;harmony&#39;</span>, <span class="dt">assay =</span> <span class="st">&#39;RNA&#39;</span>)</a>
 <a class="sourceLine" id="cb21-2" title="2">p1 &lt;-<span class="st"> </span><span class="kw">dimPlot</span>(seuInt, <span class="dt">item =</span> <span class="st">&quot;cluster&quot;</span>, <span class="dt">point_size =</span> <span class="fl">0.5</span>, <span class="dt">font_family =</span> <span class="st">&quot;serif&quot;</span>, <span class="dt">cols =</span> cols_cluster,</a>
 <a class="sourceLine" id="cb21-3" title="3">    <span class="dt">border_col =</span> <span class="st">&quot;gray10&quot;</span>,  <span class="dt">legend_pos =</span> <span class="st">&quot;right&quot;</span>)  <span class="co"># Times New Roman</span></a>
 <a class="sourceLine" id="cb21-4" title="4">p2 &lt;-<span class="st"> </span><span class="kw">dimPlot</span>(seuInt, <span class="dt">item =</span> <span class="st">&quot;batch&quot;</span>, <span class="dt">point_size =</span> <span class="fl">0.5</span>, <span class="dt">font_family =</span> <span class="st">&quot;serif&quot;</span>, <span class="dt">legend_pos =</span> <span class="st">&quot;right&quot;</span>)</a>
@@ -486,7 +486,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb22-5" title="5"><span class="st">    </span><span class="kw">group_by</span>(cluster) <span class="op">%&gt;%</span></a>
 <a class="sourceLine" id="cb22-6" title="6"><span class="st">    </span><span class="kw">top_n</span>(<span class="dt">n =</span> n, <span class="dt">wt =</span> avg_log2FC) -&gt;<span class="st"> </span>top10</a>
 <a class="sourceLine" id="cb22-7" title="7">seuInt &lt;-<span class="st"> </span><span class="kw">ScaleData</span>(seuInt)</a></code></pre></div>
-<p>Plot dot plot of normalized expressions for each spatial domain identified by using the ProFAST embeddings.</p>
+<p>Plot dot plot of normalized expressions for each spatial domain identified by using the FAST embeddings.</p>
 <div class="sourceCode" id="cb23"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb23-1" title="1">col_here &lt;-<span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;#F2E6AB&quot;</span>, <span class="st">&quot;#9C0141&quot;</span>) </a>
 <a class="sourceLine" id="cb23-2" title="2"><span class="kw">library</span>(ggplot2)</a>
 <a class="sourceLine" id="cb23-3" title="3">p1 &lt;-<span class="st"> </span><span class="kw">DotPlot</span>(seuInt, <span class="dt">features=</span><span class="kw">unname</span>(top10<span class="op">$</span>gene), <span class="dt">cols=</span>col_here, <span class="co">#  idents = ident_here,</span></a>
