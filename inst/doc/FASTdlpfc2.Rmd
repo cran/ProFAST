@@ -43,7 +43,7 @@ library(Seurat)
 ```
 
 ## View the DLPFC data
-First, we view the the  two  spatial transcriptomics data with ST platform. There are ~15000 genes for each data batch and ~7000 spots in total.
+First, we view the the  two  spatial transcriptomics data with Visium platform. There are ~15000 genes for each data batch and ~7000 spots in total.
 ```{r  eval =FALSE}
 dlpfc2 ## a list including three Seurat object with default assay: RNA
 ```
@@ -143,7 +143,7 @@ str(PRECASTObj@resList)
 
 <details>
 <summary>**Run possion version**</summary>
-Users can also use the gaussian version by the following command:
+Users can also use the possion version by the following command:
 ```{r  eval = FALSE}
 set.seed(2023)
 PRECASTObj <- FAST(PRECASTObj, q=15)

@@ -12,7 +12,7 @@
 
 <meta name="author" content="Wei Liu" />
 
-<meta name="date" content="2024-01-11" />
+<meta name="date" content="2024-03-18" />
 
 <title>FAST: simulation</title>
 
@@ -25,6 +25,7 @@
   div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
   ul.task-list{list-style: none;}
     </style>
+
 
 
 <style type="text/css">
@@ -106,13 +107,20 @@ code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warni
   for (var i = 0; i < sheets.length; i++) {
     if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
     try { var rules = sheets[i].cssRules; } catch (e) { continue; }
-    for (var j = 0; j < rules.length; j++) {
+    var j = 0;
+    while (j < rules.length) {
       var rule = rules[j];
       // check if there is a div.sourceCode rule
-      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") continue;
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
       var style = rule.style.cssText;
       // check if color or background-color is set
-      if (rule.style.color === '' && rule.style.backgroundColor === '') continue;
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
       // replace div.sourceCode by a pre.sourceCode rule
       sheets[i].deleteRule(j);
       sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
@@ -318,7 +326,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 <h1 class="title toc-ignore">FAST: simulation</h1>
 <h4 class="author">Wei Liu</h4>
-<h4 class="date">2024-01-11</h4>
+<h4 class="date">2024-03-18</h4>
 
 
 
@@ -497,29 +505,28 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <details>
 <p><summary><strong>Session Info</strong></summary></p>
 <div class="sourceCode" id="cb24"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb24-1" title="1"><span class="kw">sessionInfo</span>()</a>
-<a class="sourceLine" id="cb24-2" title="2"><span class="co">#&gt; R version 4.1.2 (2021-11-01)</span></a>
+<a class="sourceLine" id="cb24-2" title="2"><span class="co">#&gt; R version 4.2.1 (2022-06-23 ucrt)</span></a>
 <a class="sourceLine" id="cb24-3" title="3"><span class="co">#&gt; Platform: x86_64-w64-mingw32/x64 (64-bit)</span></a>
 <a class="sourceLine" id="cb24-4" title="4"><span class="co">#&gt; Running under: Windows 10 x64 (build 22621)</span></a>
 <a class="sourceLine" id="cb24-5" title="5"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb24-6" title="6"><span class="co">#&gt; Matrix products: default</span></a>
 <a class="sourceLine" id="cb24-7" title="7"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb24-8" title="8"><span class="co">#&gt; locale:</span></a>
-<a class="sourceLine" id="cb24-9" title="9"><span class="co">#&gt; [1] LC_COLLATE=C                              </span></a>
-<a class="sourceLine" id="cb24-10" title="10"><span class="co">#&gt; [2] LC_CTYPE=Chinese (Simplified)_China.936   </span></a>
-<a class="sourceLine" id="cb24-11" title="11"><span class="co">#&gt; [3] LC_MONETARY=Chinese (Simplified)_China.936</span></a>
-<a class="sourceLine" id="cb24-12" title="12"><span class="co">#&gt; [4] LC_NUMERIC=C                              </span></a>
-<a class="sourceLine" id="cb24-13" title="13"><span class="co">#&gt; [5] LC_TIME=Chinese (Simplified)_China.936    </span></a>
+<a class="sourceLine" id="cb24-9" title="9"><span class="co">#&gt; [1] LC_COLLATE=C                               </span></a>
+<a class="sourceLine" id="cb24-10" title="10"><span class="co">#&gt; [2] LC_CTYPE=Chinese (Simplified)_China.utf8   </span></a>
+<a class="sourceLine" id="cb24-11" title="11"><span class="co">#&gt; [3] LC_MONETARY=Chinese (Simplified)_China.utf8</span></a>
+<a class="sourceLine" id="cb24-12" title="12"><span class="co">#&gt; [4] LC_NUMERIC=C                               </span></a>
+<a class="sourceLine" id="cb24-13" title="13"><span class="co">#&gt; [5] LC_TIME=Chinese (Simplified)_China.utf8    </span></a>
 <a class="sourceLine" id="cb24-14" title="14"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb24-15" title="15"><span class="co">#&gt; attached base packages:</span></a>
 <a class="sourceLine" id="cb24-16" title="16"><span class="co">#&gt; [1] stats     graphics  grDevices utils     datasets  methods   base     </span></a>
 <a class="sourceLine" id="cb24-17" title="17"><span class="co">#&gt; </span></a>
 <a class="sourceLine" id="cb24-18" title="18"><span class="co">#&gt; loaded via a namespace (and not attached):</span></a>
-<a class="sourceLine" id="cb24-19" title="19"><span class="co">#&gt;  [1] digest_0.6.29   R6_2.5.1        jsonlite_1.8.0  magrittr_2.0.3 </span></a>
-<a class="sourceLine" id="cb24-20" title="20"><span class="co">#&gt;  [5] evaluate_0.15   stringi_1.7.6   rlang_1.1.0     cli_3.2.0      </span></a>
-<a class="sourceLine" id="cb24-21" title="21"><span class="co">#&gt;  [9] rstudioapi_0.13 jquerylib_0.1.4 bslib_0.3.1     rmarkdown_2.11 </span></a>
-<a class="sourceLine" id="cb24-22" title="22"><span class="co">#&gt; [13] tools_4.1.2     stringr_1.4.0   xfun_0.29       yaml_2.3.6     </span></a>
-<a class="sourceLine" id="cb24-23" title="23"><span class="co">#&gt; [17] fastmap_1.1.0   compiler_4.1.2  htmltools_0.5.2 knitr_1.37     </span></a>
-<a class="sourceLine" id="cb24-24" title="24"><span class="co">#&gt; [21] sass_0.4.1</span></a></code></pre></div>
+<a class="sourceLine" id="cb24-19" title="19"><span class="co">#&gt;  [1] digest_0.6.33   R6_2.5.1        jsonlite_1.8.7  evaluate_0.21  </span></a>
+<a class="sourceLine" id="cb24-20" title="20"><span class="co">#&gt;  [5] cachem_1.0.8    rlang_1.1.1     cli_3.4.1       rstudioapi_0.14</span></a>
+<a class="sourceLine" id="cb24-21" title="21"><span class="co">#&gt;  [9] jquerylib_0.1.4 bslib_0.5.0     rmarkdown_2.23  tools_4.2.1    </span></a>
+<a class="sourceLine" id="cb24-22" title="22"><span class="co">#&gt; [13] xfun_0.39       yaml_2.3.7      fastmap_1.1.1   compiler_4.2.1 </span></a>
+<a class="sourceLine" id="cb24-23" title="23"><span class="co">#&gt; [17] htmltools_0.5.5 knitr_1.43      sass_0.4.7</span></a></code></pre></div>
 </details>
 </div>
 
