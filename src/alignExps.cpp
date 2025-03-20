@@ -267,7 +267,7 @@ Rcpp::List correct_genes(const Rcpp::List& XList, const Rcpp::List& RList,
   field<sp_mat> Adjf(M);
   field<mat> Hf(M), Rf(M);
   field<mat> Eu(M), Varu(M), Xf(M); // require to initialize values not only shape!!!
-  int  p;
+  int  p=1;
   for(r=0; r < M; ++r){ 
     mat Xtmp = XList[r]; // enforce to become a matrix.
     Xf(r) = Xtmp;

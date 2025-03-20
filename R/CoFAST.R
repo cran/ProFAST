@@ -300,7 +300,7 @@ NCFM <- function(
 }
 
 
-
+#' @importFrom Rcpp evalCpp
 #' @importFrom Matrix t
 #' @importFrom irlba irlba
 Factor_nc <- function(

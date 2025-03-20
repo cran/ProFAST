@@ -429,7 +429,7 @@ void runICM_sp_embed(const arma::field<mat>& Vf, arma::field<ivec>& yf, arma::fi
   
   // basic info.
   int r, r_max = Vf.n_elem, K = Mu0.n_rows;
-  int i, iter, k, n;
+  int  iter, k, n;
   
   // two cached objects used for parameters update.
   field<mat> Ux(r_max);
