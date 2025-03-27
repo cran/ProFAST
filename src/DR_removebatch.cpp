@@ -12,7 +12,6 @@
 
 #include "DR_removebatch.h"
 
-#define INT_MIN (-INT_MAX - 1)
 
 using namespace Rcpp;
 using namespace arma;
@@ -602,7 +601,7 @@ Obj_SCMEBTwo SepSpatialClusterCpp_GivenK(
   mat Lam0 = zeros(M,q);
   
   vec loglik(maxIter);
-  loglik(0) = INT_MIN;
+  loglik(0) = -1e15;
   // vec Qvec(loglik);
   
   // pseudo obserbed loglikelihood.

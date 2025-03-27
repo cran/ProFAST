@@ -5,7 +5,6 @@
 #include<ctime>
 
 
-#define INT_MIN (-INT_MAX - 1)
 
 using namespace Rcpp;
 using namespace arma;
@@ -289,7 +288,7 @@ Rcpp::List correct_genes(const Rcpp::List& XList, const Rcpp::List& RList,
   }
   field<mat> Muu(Eu);
   vec elbo_vec(maxIter);
-  elbo_vec(0) = INT_MIN;
+  elbo_vec(0) = -1e15;
   int iter;
   
   Rprintf("Finish variable initialization \n");
