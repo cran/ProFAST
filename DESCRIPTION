@@ -2,8 +2,8 @@ Package: ProFAST
 Type: Package
 Title: Probabilistic Factor Analysis for Spatially-Aware Dimension
         Reduction
-Version: 1.6
-Date: 2025-03-27
+Version: 1.7
+Date: 2025-12-14
 Authors@R: 
     c(person(given = "Wei",
              family = "Liu",
@@ -36,6 +36,6 @@ VignetteBuilder: knitr
 Encoding: UTF-8
 RoxygenNote: 7.3.2
 NeedsCompilation: yes
-Packaged: 2025-03-27 13:31:59 UTC; 10297
+Packaged: 2025-12-14 06:48:28 UTC; 10297
 Repository: CRAN
-Date/Publication: 2025-03-27 14:40:02 UTC
+Date/Publication: 2025-12-14 10:30:07 UTC

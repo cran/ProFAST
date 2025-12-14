@@ -1,7 +1,7 @@
 
 # generate man files
 # devtools::document()
-# R CMD check --as-cran ProFAST_1.5.tar.gz
+# R CMD check --as-cran ProFAST_1.7.tar.gz
 # R CMD check --use-valgrind ProFAST_1.5.tar.gz
 ## usethis::use_data(pbmc3k_subset)
 # pkgdown::build_site()
@@ -422,7 +422,7 @@ FAST_single <- function (seu, Adj_sp, q = 15, fit.model=c('poisson', 'gaussian')
   
   if (is.null(assay)) 
     assay <- DefaultAssay(seu)
-  X_all <- as.matrix(GetAssayData(object = seu, slot = slot, 
+  X_all <- as.matrix(GetAssayData(object = seu, layer = slot, 
                                   assay = assay))
   # Adj_sp <- AddAdj(pos=as.matrix(seu@meta.data[,coords]), platform=platform)
   var.fe.tmp <- get_varfeature_fromSeurat(seu, assay=assay)
@@ -580,9 +580,9 @@ FAST <- function(PRECASTObj, q= 15, fit.model=c("poisson", "gaussian")){
   get_data <- function(seu, assay = NULL, fit.model='poisson'){
     if(is.null(assay)) assay <- DefaultAssay(seu)
     if(fit.model=='poisson'){
-      dat <- Matrix::t(GetAssayData(seu, assay = assay, slot= 'counts'))
+      dat <- Matrix::t(GetAssayData(seu, assay = assay, layer= 'counts'))
     }else if(fit.model=='gaussian'){
-      dat <- Matrix::t(GetAssayData(seu, assay = assay, slot= 'data'))
+      dat <- Matrix::t(GetAssayData(seu, assay = assay, layer= 'data'))
     }else{
       stop("FAST: Check the argument: fit.model! It is not supported for this fit.model!")
     }
@@ -758,7 +758,7 @@ selectHKFeatures <- function(seulist, HKFeatureList, HKFeatures=200){
   # Remove zero-variance genes
   genes_zeroVar <- unique(unlist(lapply(seulist, function(x){
     assay <- DefaultAssay(x)
-    cnts <- GetAssayData(x, assay = assay, slot= 'counts')
+    cnts <- GetAssayData(x, assay = assay, layer= 'counts')
     geneUnion[Matrix::rowSums(cnts[geneUnion,])==0]
   })))
   
@@ -1122,7 +1122,7 @@ IntegrateSRTData <- function(PRECASTObj, seulist_HK, Method=c("iSC-MEB", "Harmon
       seu_tmp <- seu_tmp[, colnames(PRECASTObj@seulist[[r]])]
       return(seu_tmp)
     })
-    XList_hk <- pbapply::pblapply(seulist_HK, function(x) Matrix::t(GetAssayData(x, assay = "RNA", slot= 'data')))
+    XList_hk <- pbapply::pblapply(seulist_HK, function(x) Matrix::t(GetAssayData(x, assay = "RNA", layer= 'data')))
     nvec <- sapply(XList_hk, nrow)
     XList_hk <- pbapply::pblapply(XList_hk, as.matrix)
     Xmat_hk <- matlist2mat(XList_hk)
@@ -1168,7 +1168,7 @@ IntegrateSRTData <- function(PRECASTObj, seulist_HK, Method=c("iSC-MEB", "Harmon
     if(any(defAssay_vec!=defAssay_vec[1])) warning("IntegrateSpaData: there are different default assays in PRECASTObj@seulist that will be used to integrating!")
     n_r <- length(defAssay_vec)
     # XList <- lapply(1:n_r,  function(r) Matrix::t(PRECASTObj@seulist[[r]][[defAssay_vec[r]]]@data))
-    XList <- lapply(1:n_r,  function(r) Matrix::t(GetAssayData(PRECASTObj@seulist[[r]], assay = defAssay_vec[r], slot= 'data') ))
+    XList <- lapply(1:n_r,  function(r) Matrix::t(GetAssayData(PRECASTObj@seulist[[r]], assay = defAssay_vec[r], layer= 'data') ))
     XList <- lapply(XList, function(x) as.matrix(x))
   }else{ ## remove the unwanted variation for all genes in the data
     ## use the same genes
@@ -1184,7 +1184,7 @@ IntegrateSRTData <- function(PRECASTObj, seulist_HK, Method=c("iSC-MEB", "Harmon
     if(any(defAssay_vec!=defAssay_vec[1])) warning("IntegrateSpaData: there are different default assays in PRECASTObj@seulist that will be used to integrating!")
     n_r <- length(defAssay_vec)
     # XList <- lapply(1:n_r,  function(r) Matrix::t(seuList_raw[[r]][[defAssay_vec[r]]]@data))
-    XList <- lapply(1:n_r,  function(r) Matrix::t(GetAssayData(seuList_raw[[r]], assay = defAssay_vec[r], slot= 'data')))
+    XList <- lapply(1:n_r,  function(r) Matrix::t(GetAssayData(seuList_raw[[r]], assay = defAssay_vec[r], layer= 'data')))
     XList <- lapply(XList, function(x) as.matrix(x))
   }
   
